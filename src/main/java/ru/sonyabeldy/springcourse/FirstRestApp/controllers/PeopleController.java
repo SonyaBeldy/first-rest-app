@@ -8,13 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import ru.sonyabeldy.springcourse.FirstRestApp.dto.PersonDTO;
 import ru.sonyabeldy.springcourse.FirstRestApp.models.Person;
 import ru.sonyabeldy.springcourse.FirstRestApp.services.PeopleService;
 import ru.sonyabeldy.springcourse.FirstRestApp.utils.PersonErrorResponse;
 import ru.sonyabeldy.springcourse.FirstRestApp.utils.PersonNotCreatedException;
 import ru.sonyabeldy.springcourse.FirstRestApp.utils.PersonNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/people")
@@ -38,7 +41,7 @@ public class PeopleController {
     }
 
     @PostMapping
-    public ResponseEntity<HttpStatus> create(@RequestBody @Valid Person person,
+    public ResponseEntity<HttpStatus> create(@RequestBody @Valid PersonDTO personDTO,
                                              BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             StringBuilder errorMsg = new StringBuilder();
@@ -53,7 +56,7 @@ public class PeopleController {
             throw new PersonNotCreatedException(errorMsg.toString());
         }
 
-        peopleService.save(person);
+        peopleService.save(convertToPerson(personDTO));
 
         // отправляем HTTP ответ с пустым телом и со статусом 200
         return ResponseEntity.ok(HttpStatus.OK);
@@ -81,4 +84,15 @@ public class PeopleController {
         // в HTT
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); //not_fount - 404 статус
     }
+
+    private Person convertToPerson(PersonDTO personDTO) {
+        Person person = new Person();
+
+        person.setName(personDTO.getName());
+        person.setAge(personDTO.getAge());
+        person.setEmail(personDTO.getEmail());
+
+        return person;
+    }
+
 }
