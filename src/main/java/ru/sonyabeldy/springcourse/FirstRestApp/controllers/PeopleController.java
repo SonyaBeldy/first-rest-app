@@ -2,6 +2,7 @@ package ru.sonyabeldy.springcourse.FirstRestApp.controllers;
 
 
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import ru.sonyabeldy.springcourse.FirstRestApp.utils.PersonErrorResponse;
 import ru.sonyabeldy.springcourse.FirstRestApp.utils.PersonNotCreatedException;
 import ru.sonyabeldy.springcourse.FirstRestApp.utils.PersonNotFoundException;
 
+import javax.management.modelmbean.ModelMBean;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -23,11 +25,14 @@ import java.util.Locale;
 @RequestMapping("/people")
 public class PeopleController {
 
-    public final PeopleService peopleService;
+    private final PeopleService peopleService;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public PeopleController(PeopleService peopleService) {
+    public PeopleController(PeopleService peopleService,
+                            ModelMapper modelMapper) {
         this.peopleService = peopleService;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping
@@ -81,18 +86,12 @@ public class PeopleController {
                 System.currentTimeMillis()
         );
 
-        // в HTT
+        // в HTTP ответе тело ответа (response) и статус в заголовке
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); //not_fount - 404 статус
     }
 
     private Person convertToPerson(PersonDTO personDTO) {
-        Person person = new Person();
-
-        person.setName(personDTO.getName());
-        person.setAge(personDTO.getAge());
-        person.setEmail(personDTO.getEmail());
-
-        return person;
+        return modelMapper.map(personDTO, Person.class); //найдет все поля, совпадающие по названию
     }
 
 }
